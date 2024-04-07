@@ -1,0 +1,171 @@
+---
+title: "Data606 project proposal"
+author: "angel"
+date: "2024-04-04"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+### Data Preparation
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(tidyverse)
+```
+
+```{r setup, echo=TRUE, results='hide', warning=FALSE, message=FALSE}
+# load data
+df <- read.csv("https://raw.githubusercontent.com/Angelogallardo05/Data606-proposal/main/NY-House-Dataset.csv")
+```
+
+```{r}
+df <- na.omit(df)
+
+
+```
+
+### Research question 
+
+**Can the amount of square footage, rooms, bathrooms, longitude, and latitude predict a home price in NYC? **
+
+
+
+### Cases 
+
+**There is data on about 5K homes for sale in NYC **
+
+
+
+### Data collection 
+
+**Kaggle**
+
+
+
+### Type of study 
+
+**the effect of sq footage, beds, bathrooms, in home prices.**
+
+
+
+### Data Source 
+
+**https://www.kaggle.com/datasets/nelgiriyewithana/new-york-housing-market**
+
+
+
+
+### Dependent Variable
+
+**home market price, quantitative**
+
+
+
+### Independent Variable(s)
+
+**square footage, bathrooms, rooms. borough**
+
+
+### Relevant summary statistics 
+
+**Provide summary statistics for each the variables. Also include appropriate visualizations related to your research question (e.g. scatter plot, boxplots, etc). This step requires the use of R, hence a code chunk is provided below. Insert more code chunks as needed.**
+
+
+```{r}
+library(dplyr)
+df_cleaned <- df %>%
+  na.omit() %>%
+  filter(PROPERTYSQFT != 2184.207862) %>%
+   filter(!is.na(PRICE), !grepl("[^0-9.]", PRICE)) %>%
+  mutate(PRICE = as.numeric(PRICE))
+```
+
+
+
+```{r}
+
+df_grouped <- df_cleaned %>%
+  filter(TYPE %in% c("House for sale", "Condo for sale", "Townhouse for sale", "Multi-family home for sale")) %>%
+  select(TYPE, PRICE, BEDS, BATH, PROPERTYSQFT, LONGITUDE, LATITUDE) %>%
+  na.omit()
+
+
+ggplot(df_grouped, aes(x = PROPERTYSQFT, y = PRICE)) +
+  geom_point() +  
+  geom_smooth(method = "lm", se = FALSE) +  
+  labs(x = "Property Square Footage", y = "Price", title = "Price vs. Property Square Footage by Type") +
+  scale_y_continuous(labels = scales::comma_format(scale = 1e-3)) +
+  facet_wrap(~ TYPE, scales = "free") +  
+  theme_minimal()
+
+
+ggplot(df_grouped, aes(x = BEDS, y = PRICE)) +
+  geom_point() +  
+  geom_smooth(method = "lm", se = FALSE) +  
+  labs(x = "Beds", y = "Price", title = "Price vs. Beds by Type") +
+  scale_y_continuous(labels = scales::comma_format(scale = 1e-3)) +
+  facet_wrap(~ TYPE, scales = "free") +
+  theme_minimal()
+
+
+ggplot(df_grouped, aes(x = BATH, y = PRICE)) +
+  geom_point() +  
+  geom_smooth(method = "lm", se = FALSE) +  
+  labs(x = "Baths", y = "Price", title = "Price vs. Baths by Type") +
+  scale_y_continuous(labels = scales::comma_format(scale = 1e-3)) +
+  facet_wrap(~ TYPE, scales = "free") +  
+  theme_minimal()
+
+ggplot(df_grouped, aes(x = LATITUDE, y = PRICE)) +
+  geom_point() +  
+  geom_smooth(method = "lm", se = FALSE) +  
+  labs(x = "Latitude", y = "Price", title = "Price vs. Latitude by Type") +
+  scale_y_continuous(labels = scales::comma_format(scale = 1e-3)) +
+  facet_wrap(~ TYPE, scales = "free") +  
+  theme_minimal()
+
+
+ggplot(df_grouped, aes(x = LONGITUDE, y = PRICE)) +
+  geom_point() +  
+  geom_smooth(method = "lm", se = FALSE) +  
+  labs(x = "Longitude", y = "Price", title = "Price vs. Longitude by Type") +
+  scale_y_continuous(labels = scales::comma_format(scale = 1e-3)) +
+  facet_wrap(~ TYPE, scales = "free") +  
+  theme_minimal()
+
+```
+
+
+
+
+```{r}
+selected_cols <- df_cleaned %>%
+  filter(TYPE == 'House for sale') %>%
+  select(BEDS, BATH, PROPERTYSQFT, LATITUDE, LONGITUDE) %>%
+  na.omit()  
+
+
+selected_cols_long <- selected_cols %>%
+  pivot_longer(cols = c(BEDS, BATH, PROPERTYSQFT, LATITUDE, LONGITUDE),
+               names_to = "Variable", values_to = "Value")
+
+
+ggplot(selected_cols_long, aes(x = Value, fill = Variable)) +
+  geom_histogram(bins = 50, alpha = 0.7, position = "identity") +
+  facet_wrap(~ Variable, scales = "free") +
+  labs(title = "Histogram of Numeric Variables",
+       x = "Value", y = "Frequency") +
+  theme_minimal()
+  
+```
+
+
+
+
+
+
